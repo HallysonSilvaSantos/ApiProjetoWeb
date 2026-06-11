@@ -1,42 +1,28 @@
-## Ajustes desta versão
+# TechStore API
 
-Versão adaptada para o segmento: **TechStore - Loja de Informática**.
+API REST desenvolvida com Node.js, TypeScript, Express e TypeORM.
 
-Rotas principais desta API:
+## Tecnologias
 
-### Autenticação
-- `/login-techstore`
-- `/validar-acesso`
-- `/recuperar-acesso`
-- `/validar-chave-acesso`
-- `/atualizar-acesso`
+- Node.js
+- TypeScript
+- Express
+- PostgreSQL
+- TypeORM
+- JWT
+- Bcrypt
+- Nodemailer
 
-### Clientes
-- `/cliente`
-- `/cliente/:id`
-- `/senha-cliente/:id`
-- `/status-cliente`
+## Instalação
 
-### Produtos
-- `/produto`
-- `/categoria-produto`
-- `/status-produto`
+npm install
 
-### Monitoramento
-- `/health-techstore`
+## Executar
 
-### Funcionalidades
+npm run build
+npm start
 
-A API permite:
+## Desenvolvimento
 
-- Cadastro e gerenciamento de clientes;
-- Controle de status dos clientes;
-- Cadastro e gerenciamento de produtos;
-- Controle de categorias de produtos;
-- Controle de situação dos produtos;
-- Autenticação utilizando JWT;
-- Recuperação de senha por e-mail;
-- Paginação de registros;
-- Integração com PostgreSQL utilizando TypeORM.
-
+npm run dev
 As entidades internas foram mantidas para preservar a estrutura, os relacionamentos e o funcionamento da aplicação.
