@@ -1,0 +1,969 @@
+{
+  "info": {
+    "_postman_id": "4f9d66f0-0f8e-4efe-b161-a9559d76f2f1",
+    "name": "INSTRUÇÕES DE USO DO POSTMAN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colecao completa da API TechStore, organizada para importacao direta no Postman e alinhada ao comportamento real do projeto."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('baseUrl')) pm.collectionVariables.set('baseUrl', 'http://localhost:8080');",
+          "if (!pm.collectionVariables.get('recoverEmail')) pm.collectionVariables.set('recoverEmail', 'carlos@techstore.com');",
+          "if (!pm.collectionVariables.get('statusClienteId')) pm.collectionVariables.set('statusClienteId', '1');",
+          "if (!pm.collectionVariables.get('categoriaProdutoId')) pm.collectionVariables.set('categoriaProdutoId', '1');",
+          "if (!pm.collectionVariables.get('statusProdutoId')) pm.collectionVariables.set('statusProdutoId', '1');"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "clienteId",
+      "value": "1"
+    },
+    {
+      "key": "statusClienteId",
+      "value": "1"
+    },
+    {
+      "key": "categoriaProdutoId",
+      "value": "1"
+    },
+    {
+      "key": "statusProdutoId",
+      "value": "1"
+    },
+    {
+      "key": "produtoId",
+      "value": "1"
+    },
+    {
+      "key": "recoverEmail",
+      "value": "carlos@techstore.com"
+    },
+    {
+      "key": "recoverKey",
+      "value": ""
+    },
+    {
+      "key": "clienteEmail",
+      "value": "cliente.postman@techstore.com"
+    },
+    {
+      "key": "produtoSlug",
+      "value": "mouse-gamer-postman"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Verificacao Inicial",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health-techstore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health-techstore"
+              ]
+            },
+            "description": "Valida se a API esta respondendo."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Autenticacao",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.user && json.user.token) pm.collectionVariables.set('token', json.user.token);",
+                  "if (json.user && json.user.email) pm.collectionVariables.set('recoverEmail', json.user.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos@techstore.com\",\n  \"password\": \"123458\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login-techstore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login-techstore"
+              ]
+            },
+            "description": "Executar primeiro para gravar o token automaticamente."
+          }
+        },
+        {
+          "name": "Validar Acesso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/validar-acesso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "validar-acesso"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recuperar Acesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.urlRecoverPassword) {",
+                  "  const url = new URL(json.urlRecoverPassword);",
+                  "  const email = url.searchParams.get('email');",
+                  "  const key = url.searchParams.get('key');",
+                  "  if (email) pm.collectionVariables.set('recoverEmail', email);",
+                  "  if (key) pm.collectionVariables.set('recoverKey', key);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urlRecoverPassword\": \"http://localhost\",\n  \"email\": \"{{recoverEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recuperar-acesso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recuperar-acesso"
+              ]
+            },
+            "description": "A API valida exatamente a URL http://localhost."
+          }
+        },
+        {
+          "name": "Validar Chave Acesso",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{recoverEmail}}\",\n  \"recoverPassword\": \"{{recoverKey}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/validar-chave-acesso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "validar-chave-acesso"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Acesso",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{recoverEmail}}\",\n  \"recoverPassword\": \"{{recoverKey}}\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/atualizar-acesso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "atualizar-acesso"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Base Para Testes",
+      "item": [
+        {
+          "name": "Cadastrar Status Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.situation && json.situation.id) pm.collectionVariables.set('statusClienteId', String(json.situation.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nameSituation\": \"Ativo Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/status-cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-cliente"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cadastrar Categoria Produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.productCategory && json.productCategory.id) pm.collectionVariables.set('categoriaProdutoId', String(json.productCategory.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acessorios Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoria-produto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria-produto"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cadastrar Status Produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.productSituation && json.productSituation.id) pm.collectionVariables.set('statusProdutoId', String(json.productSituation.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ativo Produto\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/status-produto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-produto"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Status Cliente",
+      "item": [
+        {
+          "name": "Listar Status Cliente",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-cliente?page=1&limite=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-cliente"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Status Cliente Por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-cliente/{{statusClienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-cliente",
+                "{{statusClienteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nameSituation\": \"Status Cliente Editado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/status-cliente/{{statusClienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-cliente",
+                "{{statusClienteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Status Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-cliente/{{statusClienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-cliente",
+                "{{statusClienteId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Clientes",
+      "item": [
+        {
+          "name": "Cadastrar Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.user && json.user.id) pm.collectionVariables.set('clienteId', String(json.user.id));",
+                  "if (json.user && json.user.email) pm.collectionVariables.set('clienteEmail', json.user.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente Postman\",\n  \"email\": \"{{clienteEmail}}\",\n  \"password\": \"123456\",\n  \"situationId\": \"{{statusClienteId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Clientes",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "description": "Comportamento atual do projeto: a listagem usa GET /cliente/:id e ignora o valor do parametro informado.",
+            "url": {
+              "raw": "{{baseUrl}}/cliente/1?page=1&limite=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente Postman Atualizado\",\n  \"email\": \"{{clienteEmail}}\",\n  \"password\": \"123456\",\n  \"situationId\": \"{{statusClienteId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cliente/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "{{clienteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Senha Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"654321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/senha-cliente/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "senha-cliente",
+                "{{clienteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "{{clienteId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Categoria Produto",
+      "item": [
+        {
+          "name": "Listar Categoria Produto",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria-produto?page=1&limite=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria-produto"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Categoria Produto Por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria-produto/{{categoriaProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria-produto",
+                "{{categoriaProdutoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Categoria Produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Categoria Editada\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoria-produto/{{categoriaProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria-produto",
+                "{{categoriaProdutoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Categoria Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "description": "Observacao: o codigo atual retorna sucesso, mas nao remove do banco nesta rota.",
+            "url": {
+              "raw": "{{baseUrl}}/categoria-produto/{{categoriaProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria-produto",
+                "{{categoriaProdutoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Status Produto",
+      "item": [
+        {
+          "name": "Listar Status Produto",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-produto?page=1&limite=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-produto"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Status Produto Por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-produto/{{statusProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-produto",
+                "{{statusProdutoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status Produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Status Produto Editado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/status-produto/{{statusProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-produto",
+                "{{statusProdutoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Status Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status-produto/{{statusProdutoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status-produto",
+                "{{statusProdutoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Produtos",
+      "item": [
+        {
+          "name": "Cadastrar Produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.product && json.product.id) pm.collectionVariables.set('produtoId', String(json.product.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mouse Gamer Postman\",\n  \"slug\": \"{{produtoSlug}}\",\n  \"description\": \"Mouse optico criado via Postman\",\n  \"price\": 149.9,\n  \"productCategoryId\": {{categoriaProdutoId}},\n  \"productSituationId\": {{statusProdutoId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produto"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produto?page=1&limite=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produto"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Produto Por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produto/{{produtoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produto",
+                "{{produtoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mouse Gamer Postman Pro\",\n  \"slug\": \"mouse-gamer-postman-pro\",\n  \"description\": \"Mouse atualizado via Postman\",\n  \"price\": 199.9,\n  \"productCategoryId\": {{categoriaProdutoId}},\n  \"productSituationId\": {{statusProdutoId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produto/{{produtoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produto",
+                "{{produtoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produto/{{produtoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produto",
+                "{{produtoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
